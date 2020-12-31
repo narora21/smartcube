@@ -5,21 +5,21 @@ import java.util.*;
 // Performs Iterative Deepening A* search on the 3x3 cube
 class IDAStar{
 	// user supplied heuristic (hopefully admissible)
-	Function<Cube, Double> heuristic;
-	public IDAStar(Function<Cube, Double> h) throws Exception{
-		if(h == null){
+	Heuristic h;
+	public IDAStar(Heuristic heuristic) throws Exception{
+		if(heuristic == null){
 			throw new Exception("Heuristic function cannot be null");
 		}
-		heuristic = h;
+		h = heuristic;
 	}
 
 	// converts array of twists into cubing notation
-	public static ArrayList<String> getNotation(Stack<Twist> twists){
+	public static String getNotation(ArrayList<Twist> twists){
 		if(twists == null)
 			return null;
-		ArrayList<String> moves = new ArrayList<String>();
-		while(!twists.empty()){
-			Twist curr = twists.pop();
+		String moves = "";
+		for(int i = 0; i < twists.size(); i++){
+			Twist curr = twists.get(i);
 			String m = "";
 			switch(curr.face){
 				case "front":
@@ -55,25 +55,30 @@ class IDAStar{
 				default:
 					return null;
 			}
-			moves.add(0, m);
+			moves += m;
 		}
 		return moves;
 	}
 
 	// returns best path or null on failure
-	public Stack<Twist> doAStar(Cube root){
-		Double bound = heuristic.apply(root);
+	public ArrayList<Twist> doAStar(Cube root){
+		Double bound = h.heuristic(root);
 		Stack<Cube> path = new Stack<Cube>();
 		path.push(root);
 		Stack<Twist> twists = new Stack<Twist>();
 		while(true){
 			Double t = search(path, twists, 0.0, bound);
 			if(t == null)
-				return twists;
+				break;
 			if(t == Double.POSITIVE_INFINITY)
 				return null;
 			bound = t;
 		}
+		ArrayList<Twist> ret = new ArrayList<Twist>();
+		while(!twists.empty()){
+			ret.add(0, twists.pop());
+		}
+		return ret;
 	}
 
 	// searches for path, given a bound and current cost
@@ -81,7 +86,7 @@ class IDAStar{
 	// returns infinity or a finite bound otherwise
 	Double search(Stack<Cube> path, Stack<Twist> twists, Double g, Double bound){
 		Cube node = path.peek();
-		Double f = g + heuristic.apply(node);
+		Double f = g + h.heuristic(node);
 		if(f > bound)
 			return f;
 		if(node.solved())
