@@ -8,8 +8,8 @@
 import java.util.*;
 import java.util.function.*;
 
-class Manhattan1{
-	public static Double heuristic(Cube c){
+class Manhattan1 extends Heuristic{
+	public Double heuristic(Cube c){
 		return null;
 	}
 }

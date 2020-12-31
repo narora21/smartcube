@@ -1,3 +1,5 @@
+// Author: Nikhil Arora
+
 class Twist{
 	public String face;
 	public int angle;
